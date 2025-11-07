@@ -50,9 +50,10 @@ Below is the high-level representation of the data flow and components involved:
 This project is released under the [MIT License](LICENSE).
 
 
-
+<!-- 
 1º passo: instalar o elastic e o kibana. falar logo dos backups e do user anonimo. subir os containers
 2º passo: fazer download do plugin. instalar o kafka. 
 3º passo: conectores. 
 4º passo: transformação dos dados. (documento conf)
-5º passo: dashboard exemplo
+5º passo: dashboard exemplo 
+-->
