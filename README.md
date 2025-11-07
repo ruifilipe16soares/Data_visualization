@@ -46,8 +46,6 @@ Below is the high-level representation of the data flow and components involved:
 
 ---
 
-##  License
-This project is released under the [MIT License](LICENSE).
 
 
 <!-- 
