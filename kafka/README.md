@@ -23,13 +23,13 @@ networks:
     name: elk_elasticnet
 ```
 
-## 🧩 Plugin Installation (Before Starting the Container)
+## Plugin Installation (Before Starting the Container)
 
 Before running the stack with `docker-compose up -d`, make sure the **Elasticsearch Kafka Connector** plugin is installed inside the `kafka-connect-plugins` folder.
 
 ---
 
-### ⚙️ How to Install the Plugin via Command Line
+### How to Install the Plugin via Command Line
 
 Run the following command in the same directory as your `docker-compose.yml`:
 
@@ -46,3 +46,5 @@ Before starting the containers, you need to download the plugin manually as show
 After installation, you can safely start the Kafka stack:
 
 `docker-compose up -d`
+
+IMP: Don't forget to write your credentials in `secrets` folder, on both files.
