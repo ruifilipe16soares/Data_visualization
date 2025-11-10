@@ -1,20 +1,17 @@
 #!/bin/bash
 set -a
-source /root/ELK/.env
+source /ELK/.env
 set +a
 
-# 'source' é o ficheiro .env onde está guardada a password do elastic no meu caso.
-# Também pode substituir abaixo diretamente $ELASTICSEARCH_PASSWORD pela password mas é mais seguro guardar num .env 
-
 # Caminho onde guardar o backup
-BACKUP_DIR="/root/ELK/backup"
+BACKUP_DIR="/ELK/backup"
 BACKUP_FILE="$BACKUP_DIR/kibana_backup.ndjson"
 
 # Criar diretoria para armazenar o ficheiro do backup, se não existir
 mkdir -p "$BACKUP_DIR"
 
 # Executar exportação dos saved objects
-curl -k -u elastic:$ELASTICSEARCH_PASSWORD -X POST "https://192.168.1.165:5601/api/saved_objects/_export" \
+curl -k -u elastic:$ELASTICSEARCH_PASSWORD -X POST "https://{YOUR_IP}:5601/api/saved_objects/_export" \
   -H "kbn-xsrf: true" \
   -H "Content-Type: application/json" \
   -d '{
