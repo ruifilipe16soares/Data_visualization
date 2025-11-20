@@ -49,7 +49,8 @@ After installation, you can safely start the Kafka stack:
 
 IMP: Don't forget to write your credentials in `secrets` folder, on both files.
 
-
+---
+---
 ## Creating the MySQL Connector (Debezium → Kafka → Elasticsearch)
 
 This section explains how to create and configure the **MySQL Debezium connector**, verify its status, and securely connect it to Elasticsearch using SSL certificates.
