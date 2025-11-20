@@ -49,29 +49,79 @@ After installation, you can safely start the Kafka stack:
 
 IMP: Don't forget to write your credentials in `secrets` folder, on both files.
 
-```
-CRIAR CONECTORES:
 
+## Creating the MySQL Connector (Debezium → Kafka → Elasticsearch)
+
+This section explains how to create and configure the **MySQL Debezium connector**, verify its status, and securely connect it to Elasticsearch using SSL certificates.
+
+---
+
+### Create the Connector
+
+Make sure your `mysql-connector.json` file is correctly configured (contains connection details, topics, etc.), then run:
+
+```bash
 curl -X POST -H "Content-Type: application/json" \
      --data @mysql-connector.json \
      http://localhost:8083/connectors
+```
 
-curl -X GET "http://localhost:8083/connectors/mysql-connector-chtv/status"
+You can verify that the connector was successfully created with:
 
-docker exec -it kafka sh -c "/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic mysql-chtv.chtv.pedido --from-beginning"
+```bash
+curl -X GET "http://localhost:8083/connectors/mysql-connector/status"
+```
 
+To check if data is being streamed to Kafka, consume messages from the topic:
 
-COPIAR O CERTIFICADO PARA A DIRETORIA root/ELK:
-docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ./ca.crt
+```bash
+docker exec -it kafka sh -c "/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server kafka:9092 \
+  --topic your.example.topic \
+  --from-beginning"
+```
+---
 
-Sai do Container e executa este comando na VM para copiar novamente o ficheiro com permissões abertas:
-docker cp --archive /root/docker/docker/elk/ca.crt connect:/tmp/ca.crt
+### Import the Elasticsearch CA Certificate
 
-Então força a cópia com permissão global:
-docker exec --user root connect keytool -import -trustcacerts -alias elastic-ca -file /tmp/ca.crt -keystore /etc/java/java-11-openjdk/java-11-openjdk-11.0.20.0.8-1.fc37.x86_64/lib/security/cacerts -storepass changeit -noprompt
+To allow **Kafka Connect** to securely communicate with **Elasticsearch**, the **CA certificate** must be imported into the Connect container.
 
-DEPOIS REINICIEI O connect: 
+1. **Copy the certificate from Elasticsearch (es01) to the host:**
+
+   ```bash
+   docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ./ca.crt
+   ```
+
+2. **Copy the certificate to the Connect container:**
+
+   ```bash
+   docker cp --archive /root/docker/docker/elk/ca.crt connect:/tmp/ca.crt
+   ```
+
+3. **Import the CA certificate into the Java truststore inside the Connect container:**
+
+   ```bash
+   docker exec --user root connect keytool -import -trustcacerts \
+     -alias elastic-ca \
+     -file /tmp/ca.crt \
+     -keystore /etc/java/java-11-openjdk/java-11-openjdk-11.0.20.0.8-1.fc37.x86_64/lib/security/cacerts \
+     -storepass changeit -noprompt
+   ```
+
+The command above forces the certificate import using root privileges to ensure all Java-based connectors can trust the Elasticsearch endpoint.
+
+---
+
+### Restart the Connect Container
+
+After importing the certificate, restart the Connect service so it can reload the truststore:
+
+```bash
 docker restart connect
+```
+---
+
+ Once restarted, the MySQL Debezium connector will stream data from your MySQL database into Kafka topics, which can then be synchronized with Elasticsearch:
 
 
 
