@@ -1,1 +1,22 @@
 
+{
+  "name": "elasticsearch-connector",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "topics.regex": "mysql-schema_name\\.schema_name\\..*",
+    "connection.url": "https://es01:9200",
+    "connection.username": "${file:/secrets/elasticsearch.properties:user}",
+    "connection.password": "${file:/secrets/elasticsearch.properties:password}",
+    "type.name": "_doc",
+    "key.ignore": "false",
+    "schema.ignore": "false",
+    "transforms": "unwrap,key",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.key.field": "id",
+    "behavior.on.null.values": "delete",
+    "max.retries": "15",
+    "retry.backoff.ms": "10000"
+  }
+}
