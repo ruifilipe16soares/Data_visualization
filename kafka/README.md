@@ -139,7 +139,7 @@ curl -X POST -H "Content-Type: application/json" \
 Verify that the connector is running correctly:
 
 ```bash
-curl -X GET "http://localhost:8083/connectors/elasticsearch-connector-chtv/status"
+curl -X GET "http://localhost:8083/connectors/elasticsearch-connector/status"
 ```
 
 Once active, the connector will automatically pull data from Kafka topics and index them into your Elasticsearch cluster. 
