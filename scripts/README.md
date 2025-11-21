@@ -223,5 +223,5 @@ allowing us to explore and analyze the transformed data through charts, tables, 
 Below is an example of one of the visualizations created in Kibana,  
 built using the transformed data and the defined data views:
 
-![Example Kibana Visualization](/mnt/data/example_grafic.PNG)
+![Example Kibana Visualization](scripts/example_grafic.PNG)
 
