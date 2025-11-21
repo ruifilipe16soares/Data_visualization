@@ -19,13 +19,6 @@ Imagine a schema containing two tables — **motorista** (driver) and **veiculo*
 ### Example Tables
 
 #### motoristas
-![Motoristas Table](/mnt/data/ab7f4762-c4ed-4370-91c5-b489507f50d5.png)
-
-#### veiculos
-![Veiculos Table](/mnt/data/23e5b501-80b4-4469-9fa0-3b869276cb8c.png)
-
-
-#### motoristas
 
 | id | nome           | email                 | telefone       | cnh       | veiculo_id | disponivel | avaliacao_media | criado_em           |
 |----|----------------|----------------------|----------------|-----------|-------------|-------------|------------------|---------------------|
