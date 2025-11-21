@@ -76,6 +76,8 @@ These scripts make building dashboards much easier and provide cleaner, more mea
 
 The file **`combine_index.py`** demonstrates a simple example of how this data merging and enrichment can be performed.
 
+---
+---
 
 # Hash Mechanism for Incremental Data Transformation
 
