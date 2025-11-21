@@ -76,3 +76,140 @@ These scripts make building dashboards much easier and provide cleaner, more mea
 
 The file **`combine_index.py`** demonstrates a simple example of how this data merging and enrichment can be performed.
 
+
+# Hash Mechanism for Incremental Data Transformation
+
+After creating the first version of the transformation scripts, we noticed that on every execution,  
+**all documents were being transformed and reindexed**, even those that hadn’t changed since the last run.  
+This made the process unnecessarily slower and more resource-intensive.
+
+To solve this, we implemented a **hash-based mechanism** that ensures only **new or modified documents** are processed.
+
+---
+
+## The Problem
+
+- Every execution reprocessed the entire dataset  
+- No distinction between old and new documents  
+- Unnecessary load on Elasticsearch and CPU
+
+---
+
+## The Solution: Hash-Based Processing
+
+Each document gets a **unique summary** (a hash) generated from its content.  
+The script then stores these hashes in a file (`current_hashes.pkl`) to compare them in the next run.
+
+This allows the script to detect which documents have changed or been added since the last execution.
+
+---
+
+## Hash File Structure
+
+At the beginning of each transformation script:
+
+```python
+HASH_DIR = os.path.join("hashes", new_index)
+os.makedirs(HASH_DIR, exist_ok=True)
+CURRENT_HASH_FILE = os.path.join(HASH_DIR, "current_hashes.pkl")
+PREVIOUS_HASH_FILE = os.path.join(HASH_DIR, "previous_hashes.pkl")
+```
+
+This creates an organized folder structure for each index:
+
+hashes/
+└── motoristas/
+    ├── current_hashes.pkl
+    └── previous_hashes.pkl
+
+---
+
+## Hash Generation Function
+
+The function responsible for generating a SHA-256 hash for each document:
+
+```python
+def generate_hash(doc_source):
+    doc_json = json.dumps(doc_source, sort_keys=True, default=str)
+    return hashlib.sha256(doc_json.encode('utf-8')).hexdigest()
+```
+Each document is serialized to a sorted JSON string (`sort_keys=True`) and hashed.  
+Even the slightest change in data will produce a completely different hash.
+
+---
+
+## Loading Previous Hashes
+
+Before the transformation begins, the script loads the hashes from the previous execution:
+
+- Reads `current_hashes.pkl` (if it exists)
+- Renames it as `previous_hashes.pkl` for the next comparison
+- Prepares a fresh `current_hashes.pkl` for the current run
+
+---
+
+## Comparing Hashes During Transformation
+
+Within the main transformation loop:
+
+```python
+doc_hash = generate_hash(source)
+previous_hash = previous_hashes.get(doc["_id"])
+current_hashes[doc["_id"]] = doc_hash
+if doc_hash == previous_hash:
+    continue  # Nothing changed, skip processing
+```
+---
+
+## Result
+
+- If the hash **matches** the previous one → the document hasn’t changed → **skipped**
+- If the hash **differs** → the document is **transformed and reindexed**
+
+This optimization ensures that **only new or updated documents are processed**,  
+saving significant **time and computational resources** on each run.
+
+
+## Automating the Script Execution with Cron
+
+To keep the transformation process always up to date, the script can be scheduled to run **every hour** using the Linux `crontab`.
+
+---
+
+### Open the Crontab Editor
+
+Run the following command in your terminal:
+
+```bash
+crontab -e
+```
+---
+
+### Add the Scheduled Task
+
+Add this line at the end of the file to execute the script every hour:
+
+```bash
+0 * * * * /usr/bin/python3 /your/path/scripts/combine_index.py >> /your/path/scripts/combine_index.log 2>&1
+
+This means:
+- `0 * * * *` → runs at minute 0 of every hour  
+- `/usr/bin/python3` → path to Python interpreter  
+- `/your/path/scripts/combine_index.py` → path to your transformation script  
+- `>> ...log 2>&1` → saves both output and errors into a log file
+```
+---
+
+###  Verify Scheduled Tasks
+
+List your active cron jobs:
+
+```bash
+crontab -l
+```
+---
+
+-> From now on, the script will automatically run **every hour**, checking for new or modified data, transforming it, and indexing updates into Elasticsearch.
+-> With the new indices created, we can now build data views in Kibana based on these indices.
+These data views act as the foundation for creating rich visualizations and interactive dashboards,
+allowing us to explore and analyze the transformed data through charts, tables, and filters tailored to our needs.
